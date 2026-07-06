@@ -34,6 +34,13 @@ static void fillLine(void)
     while (column < 16) putChar(' ');
 }
 
+static void writeLine(unsigned char row, const char *text)
+{
+    startLine(row);
+    putText(text);
+    fillLine();
+}
+
 static void put2(unsigned char value)
 {
     unsigned char tens = 0;
@@ -69,21 +76,26 @@ static void putNum(unsigned char value)
     putChar((char)('0' + value));
 }
 
+static void putName(unsigned char product, unsigned char species)
+{
+    if (species == FARM_COW) {
+        putText(product ? "Llet" : "Vaca");
+    } else if (species == FARM_PIG) {
+        putText(product ? "Pernil" : "Porc");
+    } else if (species == FARM_HORSE) {
+        putText(product ? "Pinz" : "Cavall");
+    } else {
+        putText(product ? "Ous" : "Gallina");
+    }
+}
+
 static void showNotification(const FarmNotification *n)
 {
-    startLine(0);
-    putText(n->kind == FARM_NOTIF_ANIMAL ? "Nou Animal" : "Nou Producte");
-    fillLine();
+    if (n->kind == FARM_NOTIF_ANIMAL) writeLine(0, "Animal");
+    else writeLine(0, "Producte");
+
     startLine(1);
-    if (n->species == FARM_COW) {
-        putText(n->kind ? "Llet" : "Vaca");
-    } else if (n->species == FARM_PIG) {
-        putText(n->kind ? "Pernil" : "Porc");
-    } else if (n->species == FARM_HORSE) {
-        putText(n->kind ? "Pinzells" : "Cavall");
-    } else {
-        putText(n->kind ? "Ous" : "Gallina");
-    }
+    putName(n->kind, n->species);
     putChar(':');
     putChar(' ');
     putNum(n->number);
@@ -93,22 +105,14 @@ static void showNotification(const FarmNotification *n)
 static void showIdle(void)
 {
     if (Farm_IsConfigured() == 0) {
-        startLine(0);
-        putText("Esperando Init");
-        fillLine();
+        writeLine(0, "Init");
         startLine(1);
         fillLine();
     } else if (SerialTime_IsConfigured() == 0) {
-        startLine(0);
-        putText(Farm_GetName());
-        fillLine();
-        startLine(1);
-        putText("Falta Hora");
-        fillLine();
+        writeLine(0, Farm_GetName());
+        writeLine(1, "Hora");
     } else {
-        startLine(0);
-        putText(Farm_GetName());
-        fillLine();
+        writeLine(0, Farm_GetName());
         startLine(1);
         put2(SerialTime_GetDay());
         putChar('/');
