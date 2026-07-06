@@ -117,7 +117,6 @@ static void showIdle(void)
         put2(SerialTime_GetDay());
         putChar('/');
         put2(SerialTime_GetMonth());
-        putText("/2026");
         fillLine();
     }
 }
