@@ -14,13 +14,13 @@ void Heartbeat_Init(void)
     TI_NewTimer(&timerHandle);
     duty = 1;
     up = 1;
-    HEARTBEAT_LED = 0;
+    HEARTBEAT_LED = 1;
 }
 
 void motorHeartbeat(void)
 {
     if (heartbeatRebellion) {
-        HEARTBEAT_LED = 0;
+        HEARTBEAT_LED = 1;
         return;
     }
     if (TI_GetTics(timerHandle) < 5) return;
@@ -37,5 +37,5 @@ void motorHeartbeat(void)
             if (duty <= 1) up = 1;
         }
     }
-    HEARTBEAT_LED = (unsigned char)(pwm < duty);
+    HEARTBEAT_LED = (pwm < duty) ? 0 : 1;
 }
