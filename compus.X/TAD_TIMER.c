@@ -7,7 +7,7 @@
 
 static volatile unsigned int ticks;
 static unsigned int starts[NUM_TIMERS];
-static unsigned char usedMask;
+static unsigned char nextTimer;
 
 void RSI_Timer0(void)
 {
@@ -28,17 +28,10 @@ void TI_Init(void)
 
 unsigned char TI_NewTimer(unsigned char *timerHandle)
 {
-    unsigned char i;
-
-    for (i = 0; i < NUM_TIMERS; i++) {
-        if ((usedMask & (1u << i)) == 0) {
-            usedMask |= (unsigned char)(1u << i);
-            *timerHandle = i;
-            starts[i] = ticks;
-            return TI_TRUE;
-        }
-    }
-    return TI_FALSE;
+    *timerHandle = nextTimer;
+    starts[nextTimer] = ticks;
+    nextTimer++;
+    return TI_TRUE;
 }
 
 void TI_ResetTics(unsigned char timerHandle)
