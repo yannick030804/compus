@@ -104,21 +104,21 @@ static void showNotification(const FarmNotification *n)
 
 static void showIdle(void)
 {
-    if (Farm_IsConfigured() == 0) {
+    if (SerialTime_IsConfigured() == 0) {
+        writeLine(0, "H");
+        startLine(1);
+        fillLine();
+    } else if (Farm_IsConfigured() == 0) {
         writeLine(0, "I");
         startLine(1);
         fillLine();
     } else {
         writeLine(0, Farm_GetName());
-        if (SerialTime_IsConfigured() != 0) {
-            startLine(1);
-            put2(SerialTime_GetDay());
-            putChar('/');
-            put2(SerialTime_GetMonth());
-            fillLine();
-            return;
-        }
-        writeLine(1, "H");
+        startLine(1);
+        put2(SerialTime_GetDay());
+        putChar('/');
+        put2(SerialTime_GetMonth());
+        fillLine();
     }
 }
 

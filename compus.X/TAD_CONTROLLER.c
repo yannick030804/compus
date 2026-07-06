@@ -226,6 +226,14 @@ void motorController(void)
     Farm_SetCurrentDate(SerialTime_IsConfigured(), SerialTime_GetDay(), SerialTime_GetMonth(),
                         SerialTime_GetHour(), SerialTime_GetMinute(), SerialTime_GetSecond());
 
+    if (SerialTime_IsConfigured() == 0) {
+        state = 0;
+        (void)SJ_GetLine();
+        (void)getButton();
+        (void)Joystick_GetEvent();
+        return;
+    }
+
     if (state == 0) {
         line = SJ_GetLine();
         if (line != 0) state = processLine(line, &animalIndex);
