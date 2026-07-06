@@ -67,7 +67,6 @@ void main(void)
     Heartbeat_Init();
     Joystick_Init();
     LCD_Init();
-    LDR_Init();
     SerialJava_Init();
     SerialTime_Init();
 

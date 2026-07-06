@@ -1,15 +1,18 @@
 #include <xc.h>
 #include "TAD_ADC.h"
 
-unsigned char adcX = 128;
-unsigned char adcY = 128;
-unsigned char adcLight = 255;
+unsigned char adcX;
+unsigned char adcY;
+unsigned char adcLight;
 static unsigned char channelIndex;
 
 void ADC_Init(void)
 {
     ADCON2 = 0x35;
     ADCON0 = 0x01;
+    adcX = 128;
+    adcY = 128;
+    adcLight = 255;
     channelIndex = 0;
 }
 
