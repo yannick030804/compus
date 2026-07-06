@@ -76,7 +76,6 @@ void main(void)
     SerialTime_Init();
 
     while (1) {
-        motorADC();
         motorButton();
         motorController();
         motorDisplay();

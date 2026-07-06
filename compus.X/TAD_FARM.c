@@ -44,8 +44,8 @@ static unsigned char queueHead, queueCount;
 static unsigned char sleepReq;
 unsigned char sleepDone;
 unsigned char sleepFound;
-static unsigned char restPending;
-static unsigned char restResult;
+unsigned char restPending;
+unsigned char restResult;
 static unsigned char sleepSpecies, sleepNumber, sleepIndex, sleepSeen;
 static unsigned char selectedIndex;
 static unsigned char dirty, eeMode, eeIndex, eeField, eeAddr;
@@ -438,19 +438,22 @@ void Farm_RequestSleep(unsigned char species, unsigned char number)
     sleepReq = 1;
 }
 
-unsigned char Farm_IsRestRequestPending(void)
-{
-    return restPending;
-}
-
-unsigned char Farm_GetRestResult(void)
-{
-    return restResult;
-}
-
 void Farm_NotifyRestSuccess(void)
 {
-    Farm_ApplySleep();
+    unsigned char s;
+
+    if (selectedIndex < totalAnimals) {
+        s = SPECIES_OF(selectedIndex);
+        if (IS_CRITICAL(selectedIndex) && criticalCount[s]) criticalCount[s]--;
+        animals[selectedIndex].info &= (unsigned char)(~FARM_CRITICAL);
+        animals[selectedIndex].day = curDay;
+        animals[selectedIndex].month = curMonth;
+        animals[selectedIndex].hour = curHour;
+        animals[selectedIndex].minute = curMinute;
+        animals[selectedIndex].second = curSecond;
+        dirty = 1;
+    }
+    selectedIndex = 255;
     restPending = 0;
     restResult = FARM_REST_SUCCESS;
 }
@@ -459,22 +462,5 @@ void Farm_NotifyRestTimeout(void)
 {
     restPending = 0;
     restResult = FARM_REST_TIMEOUT;
-    selectedIndex = 255;
-}
-
-void Farm_ApplySleep(void)
-{
-    unsigned char s;
-
-    if (selectedIndex >= totalAnimals) return;
-    s = SPECIES_OF(selectedIndex);
-    if (IS_CRITICAL(selectedIndex) && criticalCount[s]) criticalCount[s]--;
-    animals[selectedIndex].info &= (unsigned char)(~FARM_CRITICAL);
-    animals[selectedIndex].day = curDay;
-    animals[selectedIndex].month = curMonth;
-    animals[selectedIndex].hour = curHour;
-    animals[selectedIndex].minute = curMinute;
-    animals[selectedIndex].second = curSecond;
-    dirty = 1;
     selectedIndex = 255;
 }

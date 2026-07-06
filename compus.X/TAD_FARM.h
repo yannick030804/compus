@@ -25,6 +25,8 @@ extern unsigned char products[];
 extern unsigned char sleepDone;
 extern unsigned char sleepFound;
 extern unsigned char rebellion;
+extern unsigned char restPending;
+extern unsigned char restResult;
 
 #define Farm_IsConfigured()      (configured)
 #define Farm_GetName()           (farmName)
@@ -33,6 +35,8 @@ extern unsigned char rebellion;
 #define Farm_IsSleepSearchDone() (sleepDone)
 #define Farm_IsSleepSearchFound() (sleepFound)
 #define Farm_SetRebellion(active) (rebellion = (active))
+#define Farm_IsRestRequestPending() (restPending)
+#define Farm_GetRestResult() (restResult)
 
 void Farm_Init(void);
 void motorFarm(void);
@@ -43,10 +47,7 @@ void Farm_GetAnimal(unsigned char index, unsigned char *species, unsigned char *
 void Farm_Consume(unsigned char recipe);
 unsigned char Farm_GetNotification(FarmNotification *notification);
 void Farm_RequestSleep(unsigned char species, unsigned char number);
-unsigned char Farm_IsRestRequestPending(void);
-unsigned char Farm_GetRestResult(void);
 void Farm_NotifyRestSuccess(void);
 void Farm_NotifyRestTimeout(void);
-void Farm_ApplySleep(void);
 
 #endif
