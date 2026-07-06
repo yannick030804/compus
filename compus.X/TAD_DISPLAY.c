@@ -114,6 +114,10 @@ static void showIdle(void)
         put2(SerialTime_GetDay());
         putChar('/');
         put2(SerialTime_GetMonth());
+        putChar(' ');
+        put2(SerialTime_GetHour());
+        putChar(':');
+        put2(SerialTime_GetMinute());
         fillLine();
         return;
     }

@@ -177,6 +177,7 @@ static unsigned char processLine(const char *line, unsigned char *animalIndex)
         buildProducts();
         return 1;
     } else if (line[0] == 'A' && line[1] == '\0') {
+        if (Farm_GetAnimalCount() == 0) return 0;
         *animalIndex = 0;
         return 2;
     } else if (line[0] == 'R' && line[1] == '\0') {
