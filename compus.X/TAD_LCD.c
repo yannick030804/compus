@@ -91,13 +91,13 @@ void motorLCD(void)
     if (state == 0) {
         sendByte(0x80, 0);
         scan = 0;
-        state = 1;
+        state++;
     } else if (state == 1) {
         sendByte(frame[scan++], 1);
-        if (scan == 16) state = 2;
+        if (scan == 16) state++;
     } else if (state == 2) {
         sendByte(0xC0, 0);
-        state = 3;
+        state++;
     } else {
         sendByte(frame[scan++], 1);
         if (scan == 32) state = 0;

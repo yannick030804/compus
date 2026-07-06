@@ -151,7 +151,7 @@ void motorDisplay(void)
         if (Farm_GetNotification(&n)) {
             showNotification(&n);
             TI_ResetTics(timerHandle);
-            state = 1;
+            state++;
         } else {
             showIdle();
         }

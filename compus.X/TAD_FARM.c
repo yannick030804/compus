@@ -346,7 +346,7 @@ void motorFarm(void)
     if (state == 0) {
         if (newSecond() == 0) return;
         index = 0;
-        state = 1;
+        state++;
     } else if (state == 1) {
         if (index < FARM_SPECIES) {
             if (genTime[index]) {
@@ -359,7 +359,7 @@ void motorFarm(void)
             index++;
         } else {
             index = 0;
-            state = 2;
+            state++;
         }
     } else if (state == 2) {
         if (index < FARM_SPECIES) {
@@ -378,7 +378,7 @@ void motorFarm(void)
             index++;
         } else {
             index = 0;
-            state = 3;
+            state++;
         }
     } else {
         if (index < totalAnimals) {

@@ -19,13 +19,13 @@ void motorButton(void)
     if (state == 0) {
         if (BUTTON_PRESSED) {
             TI_ResetTics(timerHandle);
-            state = 1;
+            state++;
         }
     } else if (state == 1) {
         if (TI_GetTics(timerHandle) >= 30) {
             if (BUTTON_PRESSED) {
                 event = 1;
-                state = 2;
+                state++;
             } else {
                 state = 0;
             }

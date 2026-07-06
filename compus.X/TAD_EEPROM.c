@@ -21,7 +21,7 @@ void motorEEPROM(void)
     if (EECON1bits.WR == 1) return;
     if (busy == 1) {
         startWrite();
-        busy = 2;
+        busy++;
     } else {
         EECON1bits.WREN = 0;
         busy = 0;

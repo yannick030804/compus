@@ -243,7 +243,7 @@ void motorController(void)
     } else if (state == 2) {
         if (animalIndex < Farm_GetAnimalCount()) {
             buildAnimal(animalIndex);
-            state = 3;
+            state++;
         } else {
             txLine = "F\r\n";
             state = 1;
@@ -257,7 +257,7 @@ void motorController(void)
         if (Farm_IsSleepSearchDone()) {
             if (Farm_IsSleepSearchFound()) {
                 TI_ResetTics(timerHandle);
-                state = 5;
+                state++;
             } else {
                 txLine = "N\r\n";
                 state = 1;

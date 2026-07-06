@@ -6,13 +6,6 @@ static unsigned char adcY = 128;
 static unsigned char adcLight = 255;
 static unsigned char channelIndex;
 
-static unsigned char getChannel(void)
-{
-    if (channelIndex == 0) return 0;
-    if (channelIndex == 1) return 1;
-    return 3;
-}
-
 void ADC_Init(void)
 {
     ADCON2 = 0x35;
@@ -27,9 +20,11 @@ void motorADC(void)
 
     if (state == 0) {
         if (ADCON0bits.GO == 0) {
-            ADCON0 = (unsigned char)((ADCON0 & 0xC3) | (getChannel() << 2));
+            value = channelIndex;
+            if (value == 2) value = 3;
+            ADCON0 = (unsigned char)((ADCON0 & 0xC3) | (value << 2));
             ADCON0bits.GO = 1;
-            state = 1;
+            state++;
         }
     } else if (ADCON0bits.GO == 0) {
         value = ADRESH;
