@@ -225,6 +225,8 @@ void motorController(void)
     const char *line;
 
     if (SerialTime_IsConfigured() == 0) {
+        line = SJ_GetLine();
+        if (line != 0 && line[0] == 'I') parseInit(line);
         state = 0;
         return;
     }
