@@ -44,6 +44,8 @@ static unsigned char queueHead, queueCount;
 static unsigned char sleepReq;
 unsigned char sleepDone;
 unsigned char sleepFound;
+static unsigned char restPending;
+static unsigned char restResult;
 static unsigned char sleepSpecies, sleepNumber, sleepIndex, sleepSeen;
 static unsigned char selectedIndex;
 static unsigned char dirty, eeMode, eeIndex, eeField, eeAddr;
@@ -76,6 +78,8 @@ static void clearRuntime(void)
     sleepReq = 0;
     sleepDone = 0;
     sleepFound = 0;
+    restPending = 0;
+    restResult = FARM_REST_NONE;
     selectedIndex = 255;
     timeSeen = 0;
     dirty = 0;
@@ -237,6 +241,8 @@ static void processSearch(void)
                 sleepFound = 1;
                 sleepDone = 1;
                 sleepReq = 0;
+                restPending = 1;
+                restResult = FARM_REST_NONE;
                 return;
             }
         }
@@ -426,8 +432,34 @@ void Farm_RequestSleep(unsigned char species, unsigned char number)
     sleepSeen = 0;
     sleepDone = 0;
     sleepFound = 0;
+    restPending = 0;
+    restResult = FARM_REST_NONE;
     selectedIndex = 255;
     sleepReq = 1;
+}
+
+unsigned char Farm_IsRestRequestPending(void)
+{
+    return restPending;
+}
+
+unsigned char Farm_GetRestResult(void)
+{
+    return restResult;
+}
+
+void Farm_NotifyRestSuccess(void)
+{
+    Farm_ApplySleep();
+    restPending = 0;
+    restResult = FARM_REST_SUCCESS;
+}
+
+void Farm_NotifyRestTimeout(void)
+{
+    restPending = 0;
+    restResult = FARM_REST_TIMEOUT;
+    selectedIndex = 255;
 }
 
 void Farm_ApplySleep(void)

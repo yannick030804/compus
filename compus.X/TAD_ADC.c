@@ -1,41 +1,31 @@
 #include <xc.h>
 #include "TAD_ADC.h"
 
-unsigned char adcX;
-unsigned char adcY;
-unsigned char adcLight;
-static unsigned char channelIndex;
+static unsigned char busy;
 
 void ADC_Init(void)
 {
     ADCON2 = 0x35;
     ADCON0 = 0x01;
-    adcX = 128;
-    adcY = 128;
-    adcLight = 255;
-    channelIndex = 0;
+    busy = 0;
 }
 
-void motorADC(void)
+unsigned char ADC_Start(unsigned char channel)
 {
-    static unsigned char state = 0;
-    unsigned char value;
+    if (busy) return 0;
+    ADCON0 = (unsigned char)((ADCON0 & 0xC3) | (channel << 2));
+    ADCON0bits.GO = 1;
+    busy = 1;
+    return 1;
+}
 
-    if (state == 0) {
-        if (ADCON0bits.GO == 0) {
-            value = channelIndex;
-            if (value == 2) value = 3;
-            ADCON0 = (unsigned char)((ADCON0 & 0xC3) | (value << 2));
-            ADCON0bits.GO = 1;
-            state++;
-        }
-    } else if (ADCON0bits.GO == 0) {
-        value = ADRESH;
-        if (channelIndex == 0) adcX = value;
-        else if (channelIndex == 1) adcY = value;
-        else adcLight = value;
-        channelIndex++;
-        if (channelIndex >= 3) channelIndex = 0;
-        state = 0;
-    }
+unsigned char ADC_IsDone(void)
+{
+    return (unsigned char)(!ADCON0bits.GO);
+}
+
+unsigned char ADC_Read(void)
+{
+    busy = 0;
+    return ADRESH;
 }

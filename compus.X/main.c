@@ -35,8 +35,7 @@ void __interrupt() RSI_HIGH(void)
     }
 }
 
-void main(void)
-{
+void Init_Ports() {
     TRISCbits.TRISC6 = 0;
     TRISCbits.TRISC7 = 1;
     TRISBbits.TRISB0 = 1;
@@ -56,7 +55,12 @@ void main(void)
     TRISDbits.TRISD5 = 0;
     TRISDbits.TRISD6 = 0;
     ADCON1 = 0x0B;
+}
 
+void main(void)
+{
+    
+    Init_Ports();
     TI_Init();
     ADC_Init();
     Button_Init();
@@ -67,6 +71,7 @@ void main(void)
     Heartbeat_Init();
     Joystick_Init();
     LCD_Init();
+    LDR_Init();
     SerialJava_Init();
     SerialTime_Init();
 

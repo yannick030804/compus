@@ -4,12 +4,9 @@
 #include "TAD_FARM.h"
 #include "TAD_HEARTBEAT.h"
 #include "TAD_JOYSTICK.h"
-#include "TAD_LDR.h"
 #include "TAD_SERIAL_JAVA.h"
 #include "TAD_SERIAL_TIME.h"
-#include "TAD_TIMER.h"
 
-static unsigned char timerHandle;
 static const char *txLine;
 static char txBuf[24];
 static char nameBuf[17];
@@ -228,7 +225,6 @@ static unsigned char processInputs(void)
 
 void Controller_Init(void)
 {
-    TI_NewTimer(&timerHandle);
     txLine = 0;
 }
 
@@ -263,7 +259,6 @@ void motorController(void)
     } else if (state == 4) {
         if (Farm_IsSleepSearchDone()) {
             if (Farm_IsSleepSearchFound()) {
-                TI_ResetTics(timerHandle);
                 state++;
             } else {
                 setReply('N');
@@ -271,11 +266,10 @@ void motorController(void)
             }
         }
     } else {
-        if (LDR_IsCovered()) {
-            Farm_ApplySleep();
+        if (Farm_GetRestResult() == FARM_REST_SUCCESS) {
             setReply('Y');
             state = 1;
-        } else if (TI_GetTics(timerHandle) >= 5000) {
+        } else if (Farm_GetRestResult() == FARM_REST_TIMEOUT) {
             setReply('N');
             state = 1;
         }

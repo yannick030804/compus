@@ -2,14 +2,8 @@
 #define TAD_ADC_H
 
 void ADC_Init(void);
-void motorADC(void);
-
-extern unsigned char adcX;
-extern unsigned char adcY;
-extern unsigned char adcLight;
-
-#define ADC_GetX()     (adcX)
-#define ADC_GetY()     (adcY)
-#define ADC_GetLight() (adcLight)
+unsigned char ADC_Start(unsigned char channel);
+unsigned char ADC_IsDone(void);
+unsigned char ADC_Read(void);
 
 #endif

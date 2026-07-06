@@ -8,6 +8,9 @@
 
 #define FARM_NOTIF_ANIMAL  0
 #define FARM_NOTIF_PRODUCT 1
+#define FARM_REST_NONE     0
+#define FARM_REST_SUCCESS  1
+#define FARM_REST_TIMEOUT  2
 
 typedef struct {
     unsigned char kind;
@@ -40,6 +43,10 @@ void Farm_GetAnimal(unsigned char index, unsigned char *species, unsigned char *
 void Farm_Consume(unsigned char recipe);
 unsigned char Farm_GetNotification(FarmNotification *notification);
 void Farm_RequestSleep(unsigned char species, unsigned char number);
+unsigned char Farm_IsRestRequestPending(void);
+unsigned char Farm_GetRestResult(void);
+void Farm_NotifyRestSuccess(void);
+void Farm_NotifyRestTimeout(void);
 void Farm_ApplySleep(void);
 
 #endif
