@@ -52,30 +52,6 @@ static void put2(unsigned char value)
     putChar((char)('0' + value));
 }
 
-static void putNum(unsigned char value)
-{
-    unsigned char d = 0;
-    unsigned char started = 0;
-
-    if (value >= 100) {
-        while (value >= 100) {
-            value = (unsigned char)(value - 100);
-            d++;
-        }
-        putChar((char)('0' + d));
-        started = 1;
-        d = 0;
-    }
-    if (value >= 10 || started) {
-        while (value >= 10) {
-            value = (unsigned char)(value - 10);
-            d++;
-        }
-        putChar((char)('0' + d));
-    }
-    putChar((char)('0' + value));
-}
-
 static void putName(unsigned char product, unsigned char species)
 {
     if (species == FARM_COW) {
@@ -98,7 +74,7 @@ static void showNotification(const FarmNotification *n)
     putName(n->kind, n->species);
     putChar(':');
     putChar(' ');
-    putNum(n->number);
+    put2(n->number);
     fillLine();
 }
 
