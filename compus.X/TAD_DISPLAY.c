@@ -79,20 +79,20 @@ static void putNum(unsigned char value)
 static void putName(unsigned char product, unsigned char species)
 {
     if (species == FARM_COW) {
-        putText(product ? "Llet" : "Vaca");
+        putText(product ? "Ll" : "Va");
     } else if (species == FARM_PIG) {
-        putText(product ? "Pernil" : "Porc");
+        putText(product ? "Pe" : "Po");
     } else if (species == FARM_HORSE) {
-        putText(product ? "Pinz" : "Cavall");
+        putText(product ? "Pi" : "Ca");
     } else {
-        putText(product ? "Ous" : "Gallina");
+        putText(product ? "Ou" : "Ga");
     }
 }
 
 static void showNotification(const FarmNotification *n)
 {
-    if (n->kind == FARM_NOTIF_ANIMAL) writeLine(0, "Animal");
-    else writeLine(0, "Producte");
+    if (n->kind == FARM_NOTIF_ANIMAL) writeLine(0, "A");
+    else writeLine(0, "P");
 
     startLine(1);
     putName(n->kind, n->species);
@@ -105,12 +105,12 @@ static void showNotification(const FarmNotification *n)
 static void showIdle(void)
 {
     if (Farm_IsConfigured() == 0) {
-        writeLine(0, "Init");
+        writeLine(0, "I");
         startLine(1);
         fillLine();
     } else if (SerialTime_IsConfigured() == 0) {
         writeLine(0, Farm_GetName());
-        writeLine(1, "Hora");
+        writeLine(1, "H");
     } else {
         writeLine(0, Farm_GetName());
         startLine(1);
