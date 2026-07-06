@@ -29,6 +29,9 @@ void motorLDR(void)
         case 1:
             if (Farm_IsRestRequestPending() == 0) {
                 state = 0;
+            } else if (TI_GetTics(timerHandle) >= LDR_TIMEOUT_MS) {
+                Farm_NotifyRestTimeout();
+                state = 0;
             } else if (ADC_Start(LDR_ADC_CHANNEL)) {
                 state++;
             }
