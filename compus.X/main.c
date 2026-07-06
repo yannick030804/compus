@@ -1,13 +1,95 @@
-/*
- * File:   newmain.c
- * Author: yanni
- *
- * Created on 5 de julio de 2026, 22:40
- */
-
-
 #include <xc.h>
 
-void main(void) {
-    return;
+#include "TAD_ADC.h"
+#include "TAD_BUTTON.h"
+#include "TAD_CONTROLLER.h"
+#include "TAD_DISPLAY.h"
+#include "TAD_EEPROM.h"
+#include "TAD_FARM.h"
+#include "TAD_HEARTBEAT.h"
+#include "TAD_JOYSTICK.h"
+#include "TAD_LCD.h"
+#include "TAD_LDR.h"
+#include "TAD_SERIAL_JAVA.h"
+#include "TAD_SERIAL_TIME.h"
+#include "TAD_TIMER.h"
+
+#pragma config OSC = HS
+#pragma config PBADEN = DIG
+#pragma config WDT = OFF
+#pragma config MCLRE = ON
+#pragma config DEBUG = OFF
+#pragma config PWRT = OFF
+#pragma config BOR = OFF
+#pragma config LVP = OFF
+
+static void PORT_Init(void)
+{
+    TRISCbits.TRISC6 = 0;
+    TRISCbits.TRISC7 = 1;
+
+    TRISBbits.TRISB0 = 1;
+    TRISBbits.TRISB1 = 0;
+    TRISBbits.TRISB2 = 1;
+    INTCON2bits.RBPU = 0;
+
+    TRISAbits.TRISA0 = 1;
+    TRISAbits.TRISA1 = 1;
+    TRISAbits.TRISA3 = 1;
+    TRISAbits.TRISA4 = 0;
+    LATAbits.LATA4 = 0;
+
+    LATD = 0x00;
+    TRISDbits.TRISD1 = 0;
+    TRISDbits.TRISD2 = 0;
+    TRISDbits.TRISD3 = 0;
+    TRISDbits.TRISD4 = 0;
+    TRISDbits.TRISD5 = 0;
+    TRISDbits.TRISD6 = 0;
+
+    ADCON1 = 0x0B;
+}
+
+void __interrupt() RSI_HIGH(void)
+{
+    if (INTCONbits.TMR0IF == 1) {
+        RSI_Timer0();
+        SerialTime_TickISR();
+    }
+    if (INTCON3bits.INT2IE == 1 && INTCON3bits.INT2IF == 1) {
+        INTCON3bits.INT2IF = 0;
+        SerialTime_StartBitISR();
+    }
+}
+
+void main(void)
+{
+    PORT_Init();
+    TI_Init();
+    ADC_Init();
+    Button_Init();
+    Controller_Init();
+    Display_Init();
+    EEPROM_Init();
+    Farm_Init();
+    Heartbeat_Init();
+    Joystick_Init();
+    LCD_Init();
+    LDR_Init();
+    SerialJava_Init();
+    SerialTime_Init();
+
+    while (1) {
+        motorADC();
+        motorButton();
+        motorController();
+        motorDisplay();
+        motorEEPROM();
+        motorFarm();
+        motorHeartbeat();
+        motorJoystick();
+        motorLCD();
+        motorLDR();
+        motorSerialTime();
+    }
 }

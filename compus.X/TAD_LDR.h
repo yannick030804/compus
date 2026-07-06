@@ -1,0 +1,8 @@
+#ifndef TAD_LDR_H
+#define TAD_LDR_H
+
+void LDR_Init(void);
+void motorLDR(void);
+unsigned char LDR_IsCovered(void);
+
+#endif
