@@ -280,10 +280,6 @@ static unsigned char newSecond(void)
 void Farm_Init(void)
 {
     clearRuntime();
-    eeMode = 0;
-    eeIndex = 0;
-    eeField = 0;
-    eeAddr = 1;
     loadEEPROM();
 }
 

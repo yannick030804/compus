@@ -124,20 +124,6 @@ static unsigned char parseSleep(const char *s)
     return 1;
 }
 
-static unsigned char appendSpecies(unsigned char k, unsigned char s)
-{
-    if (s == FARM_COW) {
-        k = appendText(k, "VACA");
-    } else if (s == FARM_PIG) {
-        k = appendText(k, "PORC");
-    } else if (s == FARM_HORSE) {
-        k = appendText(k, "CAVALL");
-    } else {
-        k = appendText(k, "GALLINA");
-    }
-    return k;
-}
-
 static void buildProducts(void)
 {
     unsigned char k = 2;
@@ -161,7 +147,15 @@ static void buildAnimal(unsigned char animalIndex)
     Farm_GetAnimal(animalIndex, &s, &n, &c);
     txBuf[0] = 'A';
     txBuf[1] = ':';
-    k = appendSpecies(k, s);
+    if (s == FARM_COW) {
+        k = appendText(k, "VACA");
+    } else if (s == FARM_PIG) {
+        k = appendText(k, "PORC");
+    } else if (s == FARM_HORSE) {
+        k = appendText(k, "CAVALL");
+    } else {
+        k = appendText(k, "GALLINA");
+    }
     txBuf[k++] = '$';
     k = appendNum(k, n);
     txBuf[k++] = '$';
@@ -221,11 +215,6 @@ static unsigned char processInputs(void)
     else if (e == JOY_RIGHT) setReply('R');
     else return 0;
     return 1;
-}
-
-void Controller_Init(void)
-{
-    txLine = 0;
 }
 
 void motorController(void)

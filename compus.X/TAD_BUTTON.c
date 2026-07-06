@@ -9,7 +9,6 @@ void Button_Init(void)
 {
     CONFIG_BUTTON;
     TI_NewTimer(&timerHandle);
-    event = 0;
 }
 
 void motorButton(void)

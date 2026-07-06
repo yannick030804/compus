@@ -12,8 +12,6 @@ void Heartbeat_Init(void)
 {
     CONFIG_HEARTBEAT;
     TI_NewTimer(&timerHandle);
-    heartbeatRebellion = 0;
-    pwm = 0;
     duty = 1;
     up = 1;
     HEARTBEAT_LED = 0;

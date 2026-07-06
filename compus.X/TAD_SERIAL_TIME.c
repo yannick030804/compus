@@ -121,12 +121,6 @@ void SerialTime_Init(void)
     CONFIG_SERIAL_TIME;
     TI_NewTimer(&timerHandle);
     SerialTime_Reset();
-    rxReady = 0;
-    rxActive = 0;
-    txActive = 0;
-    txPtr = 0;
-    txEcho = 0;
-    rxLen = 0;
     INTCON2bits.INTEDG2 = 0;
     INTCON3bits.INT2IF = 0;
     INTCON3bits.INT2IE = 1;

@@ -18,9 +18,6 @@ static unsigned char joyPacked;
 void Joystick_Init(void)
 {
     CONFIG_JOYSTICK;
-    adcX = 128;
-    adcY = 128;
-    joyPacked = 0;
 }
 
 void motorJoystick(void)

@@ -18,8 +18,6 @@ void RSI_Timer0(void)
 
 void TI_Init(void)
 {
-    ticks = 0;
-    usedMask = 0;
     T0CON = T0CON_CONFIG;
     TMR0 = TMR0_RELOAD;
     INTCONbits.TMR0IF = 0;
