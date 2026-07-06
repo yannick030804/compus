@@ -19,37 +19,25 @@ void motorLDR(void)
 {
     static unsigned char state = 0;
 
-    switch (state) {
-        case 0:
-            if (Farm_IsRestRequestPending()) {
-                TI_ResetTics(timerHandle);
-                state++;
-            }
-            break;
-        case 1:
-            if (Farm_IsRestRequestPending() == 0) {
-                state = 0;
-            } else if (TI_GetTics(timerHandle) >= LDR_TIMEOUT_MS) {
-                Farm_NotifyRestTimeout();
-                state = 0;
-            } else if (ADC_Start(LDR_ADC_CHANNEL)) {
-                state++;
-            }
-            break;
-        default:
-            if (Farm_IsRestRequestPending() == 0) {
-                state = 0;
-            } else if (ADC_IsDone()) {
-                if (ADC_Read() < LDR_COVER_THRESHOLD) {
-                    Farm_NotifyRestSuccess();
-                    state = 0;
-                } else if (TI_GetTics(timerHandle) >= LDR_TIMEOUT_MS) {
-                    Farm_NotifyRestTimeout();
-                    state = 0;
-                } else {
-                    state = 1;
-                }
-            }
-            break;
+    if (Farm_IsRestRequestPending() == 0) {
+        state = 0;
+        return;
+    }
+    if (state == 0) {
+        TI_ResetTics(timerHandle);
+        state = 1;
+    }
+    if (TI_GetTics(timerHandle) >= LDR_TIMEOUT_MS) {
+        Farm_NotifyRestTimeout();
+        state = 0;
+    } else if (state == 1) {
+        if (ADC_Start(LDR_ADC_CHANNEL)) state = 2;
+    } else if (ADC_IsDone()) {
+        if (ADC_Read() < LDR_COVER_THRESHOLD) {
+            Farm_NotifyRestSuccess();
+            state = 0;
+        } else {
+            state = 1;
+        }
     }
 }
