@@ -79,13 +79,17 @@ static void putNum(unsigned char value)
 static void putName(unsigned char product, unsigned char species)
 {
     if (species == FARM_COW) {
-        putText(product ? "Ll" : "Va");
+        putChar(product ? 'L' : 'V');
+        putChar(product ? 'l' : 'a');
     } else if (species == FARM_PIG) {
-        putText(product ? "Pe" : "Po");
+        putChar('P');
+        putChar(product ? 'e' : 'o');
     } else if (species == FARM_HORSE) {
-        putText(product ? "Pi" : "Ca");
+        putChar(product ? 'P' : 'C');
+        putChar(product ? 'i' : 'a');
     } else {
-        putText(product ? "Ou" : "Ga");
+        putChar(product ? 'O' : 'G');
+        putChar(product ? 'u' : 'a');
     }
 }
 
