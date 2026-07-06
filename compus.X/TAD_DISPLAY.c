@@ -79,17 +79,13 @@ static void putNum(unsigned char value)
 static void putName(unsigned char product, unsigned char species)
 {
     if (species == FARM_COW) {
-        putChar(product ? 'L' : 'V');
-        putChar(product ? 'l' : 'a');
+        putText(product ? "Ll" : "Va");
     } else if (species == FARM_PIG) {
-        putChar('P');
-        putChar(product ? 'e' : 'o');
+        putText(product ? "Pe" : "Po");
     } else if (species == FARM_HORSE) {
-        putChar(product ? 'P' : 'C');
-        putChar(product ? 'i' : 'a');
+        putText(product ? "Pi" : "Ca");
     } else {
-        putChar(product ? 'O' : 'G');
-        putChar(product ? 'u' : 'a');
+        putText(product ? "Ou" : "Ga");
     }
 }
 
@@ -112,16 +108,17 @@ static void showIdle(void)
         writeLine(0, "I");
         startLine(1);
         fillLine();
-    } else if (SerialTime_IsConfigured() == 0) {
-        writeLine(0, Farm_GetName());
-        writeLine(1, "H");
     } else {
         writeLine(0, Farm_GetName());
-        startLine(1);
-        put2(SerialTime_GetDay());
-        putChar('/');
-        put2(SerialTime_GetMonth());
-        fillLine();
+        if (SerialTime_IsConfigured() != 0) {
+            startLine(1);
+            put2(SerialTime_GetDay());
+            putChar('/');
+            put2(SerialTime_GetMonth());
+            fillLine();
+            return;
+        }
+        writeLine(1, "H");
     }
 }
 
