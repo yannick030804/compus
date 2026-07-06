@@ -38,6 +38,7 @@ void __interrupt() RSI_HIGH(void)
 void main(void)
 {
     INTCON2bits.RBPU = 0;
+    TRISAbits.TRISA3 = 1;
     ADCON1 = 0x0B;
     TI_Init();
     ADC_Init();
