@@ -7,7 +7,6 @@ void ADC_Init(void)
 {
     ADCON2 = 0x35;
     ADCON0 = 0x01;
-    busy = 0;
 }
 
 unsigned char ADC_Start(unsigned char channel)
