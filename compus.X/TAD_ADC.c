@@ -1,9 +1,9 @@
 #include <xc.h>
 #include "TAD_ADC.h"
 
-static unsigned char adcX = 128;
-static unsigned char adcY = 128;
-static unsigned char adcLight = 255;
+unsigned char adcX = 128;
+unsigned char adcY = 128;
+unsigned char adcLight = 255;
 static unsigned char channelIndex;
 
 void ADC_Init(void)
@@ -36,7 +36,3 @@ void motorADC(void)
         state = 0;
     }
 }
-
-unsigned char ADC_GetX(void) { return adcX; }
-unsigned char ADC_GetY(void) { return adcY; }
-unsigned char ADC_GetLight(void) { return adcLight; }

@@ -3,6 +3,8 @@
 
 void LDR_Init(void);
 void motorLDR(void);
-unsigned char LDR_IsCovered(void);
+
+extern unsigned char ldrCovered;
+#define LDR_IsCovered() (ldrCovered)
 
 #endif

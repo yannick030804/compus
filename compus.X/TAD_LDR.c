@@ -4,19 +4,14 @@
 
 #define LDR_DARK_LIMIT 80
 
-static unsigned char covered;
+unsigned char ldrCovered;
 
 void LDR_Init(void)
 {
-    covered = 0;
+    ldrCovered = 0;
 }
 
 void motorLDR(void)
 {
-    covered = (unsigned char)(ADC_GetLight() < LDR_DARK_LIMIT);
-}
-
-unsigned char LDR_IsCovered(void)
-{
-    return covered;
+    ldrCovered = (unsigned char)(ADC_GetLight() < LDR_DARK_LIMIT);
 }

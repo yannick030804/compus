@@ -3,24 +3,19 @@
 
 static unsigned char busy;
 
-static void startWrite(void)
-{
-    EECON1bits.EEPGD = 0;
-    EECON1bits.CFGS = 0;
-    EECON1bits.WREN = 1;
-    di();
-    EECON2 = 0x55;
-    EECON2 = 0xAA;
-    EECON1bits.WR = 1;
-    ei();
-}
-
 void motorEEPROM(void)
 {
     if (busy == 0) return;
     if (EECON1bits.WR == 1) return;
     if (busy == 1) {
-        startWrite();
+        EECON1bits.EEPGD = 0;
+        EECON1bits.CFGS = 0;
+        EECON1bits.WREN = 1;
+        di();
+        EECON2 = 0x55;
+        EECON2 = 0xAA;
+        EECON1bits.WR = 1;
+        ei();
         busy++;
     } else {
         EECON1bits.WREN = 0;

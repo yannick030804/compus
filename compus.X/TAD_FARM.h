@@ -15,22 +15,31 @@ typedef struct {
     unsigned char number;
 } FarmNotification;
 
+extern char farmName[];
+extern unsigned char configured;
+extern unsigned char totalAnimals;
+extern unsigned char products[];
+extern unsigned char sleepDone;
+extern unsigned char sleepFound;
+extern unsigned char rebellion;
+
+#define Farm_IsConfigured()      (configured)
+#define Farm_GetName()           (farmName)
+#define Farm_GetAnimalCount()    (totalAnimals)
+#define Farm_GetProductTotal(s)  (products[(s)])
+#define Farm_IsSleepSearchDone() (sleepDone)
+#define Farm_IsSleepSearchFound() (sleepFound)
+#define Farm_SetRebellion(active) (rebellion = (active))
+
 void Farm_Init(void);
 void motorFarm(void);
 void Farm_Reset(void);
 void Farm_SetConfig(const char *name, unsigned char cow, unsigned char horse, unsigned char pig, unsigned char chicken);
 void Farm_SetCurrentDate(unsigned char valid, unsigned char day, unsigned char month, unsigned char hour, unsigned char minute, unsigned char second);
-unsigned char Farm_IsConfigured(void);
-const char *Farm_GetName(void);
-unsigned char Farm_GetAnimalCount(void);
 void Farm_GetAnimal(unsigned char index, unsigned char *species, unsigned char *number, unsigned char *critical);
-unsigned char Farm_GetProductTotal(unsigned char species);
 void Farm_Consume(unsigned char recipe);
-void Farm_SetRebellion(unsigned char active);
 unsigned char Farm_GetNotification(FarmNotification *notification);
 void Farm_RequestSleep(unsigned char species, unsigned char number);
-unsigned char Farm_IsSleepSearchDone(void);
-unsigned char Farm_IsSleepSearchFound(void);
 void Farm_ApplySleep(void);
 
 #endif

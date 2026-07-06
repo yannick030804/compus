@@ -11,6 +11,9 @@
 #define FARM_QUEUE 3
 #define EE_CLEAR 1
 #define EE_SAVE  2
+#define SPECIES_OF(i) ((unsigned char)(animals[(i)].info & FARM_SPECIES_MASK))
+#define IS_CRITICAL(i) ((unsigned char)((animals[(i)].info & FARM_CRITICAL) != 0))
+#define PRODUCT_TIME(s) ((s) == FARM_COW ? 47 : ((s) == FARM_HORSE ? 23 : ((s) == FARM_PIG ? 31 : 13)))
 
 typedef struct {
     unsigned char info;
@@ -21,54 +24,48 @@ typedef struct {
     unsigned char second;
 } Animal;
 
-static char farmName[FARM_MAX_NAME + 1];
+char farmName[FARM_MAX_NAME + 1];
 static Animal animals[FARM_MAX_ANIMALS];
 static unsigned char genTime[FARM_SPECIES];
 static unsigned char genCount[FARM_SPECIES];
 static unsigned char prodCount[FARM_SPECIES];
-static unsigned char products[FARM_SPECIES];
+unsigned char products[FARM_SPECIES];
 static unsigned char animalCount[FARM_SPECIES];
 static unsigned char criticalCount[FARM_SPECIES];
-static unsigned char totalAnimals;
-static unsigned char configured;
-static unsigned char rebellion;
+unsigned char totalAnimals;
+unsigned char configured;
+unsigned char rebellion;
 static unsigned char dateValid;
 static unsigned char curDay, curMonth, curHour, curMinute, curSecond;
 static unsigned char lastDay, lastMonth, lastHour, lastMinute, lastSecond;
 static unsigned char timeSeen;
 static FarmNotification queue[FARM_QUEUE];
 static unsigned char queueHead, queueCount;
-static unsigned char sleepReq, sleepDone, sleepFound;
+static unsigned char sleepReq;
+unsigned char sleepDone;
+unsigned char sleepFound;
 static unsigned char sleepSpecies, sleepNumber, sleepIndex, sleepSeen;
 static unsigned char selectedIndex;
 static unsigned char dirty, eeMode, eeIndex, eeField, eeAddr;
 
-static unsigned char speciesOf(unsigned char i) { return (unsigned char)(animals[i].info & FARM_SPECIES_MASK); }
-static unsigned char isCriticalFlag(unsigned char i) { return (unsigned char)((animals[i].info & FARM_CRITICAL) != 0); }
-
-static void clearCounts(void)
+static void recount(void)
 {
-    unsigned char i;
+    unsigned char i, s;
+
     for (i = 0; i < FARM_SPECIES; i++) {
         animalCount[i] = 0;
         criticalCount[i] = 0;
     }
-}
-
-static void recount(void)
-{
-    unsigned char i, s;
-    clearCounts();
     for (i = 0; i < totalAnimals; i++) {
-        s = speciesOf(i);
+        s = SPECIES_OF(i);
         if (s < FARM_SPECIES) {
             animalCount[s]++;
-            if (isCriticalFlag(i)) criticalCount[s]++;
+            if (IS_CRITICAL(i)) criticalCount[s]++;
         }
     }
 }
 
-static void clearRuntime(unsigned char clearAnimals)
+static void clearRuntime(void)
 {
     unsigned char i;
 
@@ -88,57 +85,49 @@ static void clearRuntime(unsigned char clearAnimals)
         genCount[i] = 0;
         prodCount[i] = 0;
         products[i] = 0;
+        animalCount[i] = 0;
+        criticalCount[i] = 0;
     }
-    if (clearAnimals) totalAnimals = 0;
-    recount();
-}
-
-static unsigned char daysInMonth(unsigned char month)
-{
-    if (month == 2) return 28;
-    if (month == 4 || month == 6 || month == 9 || month == 11) return 30;
-    return 31;
+    totalAnimals = 0;
 }
 
 static unsigned char isNextDate(unsigned char d, unsigned char m)
 {
+    unsigned char last = 31;
+
     if (curMonth == m && curDay == (unsigned char)(d + 1)) return 1;
-    if (curDay == 1 && curMonth == (unsigned char)(m + 1) && d == daysInMonth(m)) return 1;
+    if (m == 2) last = 28;
+    else if (m == 4 || m == 6 || m == 9 || m == 11) last = 30;
+    if (curDay == 1 && curMonth == (unsigned char)(m + 1) && d == last) return 1;
     if (curDay == 1 && curMonth == 1 && m == 12 && d == 31) return 1;
     return 0;
 }
 
 static unsigned char elapsedCritical(const Animal *a)
 {
-    unsigned int now;
-    unsigned int last;
-    unsigned int elapsed;
+    unsigned char minutes;
 
     if (dateValid == 0) return 0;
     if (a->day == curDay && a->month == curMonth) {
-        now = (((unsigned int)curHour << 6) - ((unsigned int)curHour << 2)) + curMinute;
-        last = (((unsigned int)a->hour << 6) - ((unsigned int)a->hour << 2)) + a->minute;
-        if (now < last) return 0;
-        elapsed = now - last;
-        if (elapsed > 2) return 1;
-        if (elapsed < 2) return 0;
+        if (curHour == a->hour) {
+            if (curMinute < a->minute) return 0;
+            minutes = (unsigned char)(curMinute - a->minute);
+        } else if (curHour == (unsigned char)(a->hour + 1)) {
+            minutes = (unsigned char)(60 - a->minute + curMinute);
+        } else {
+            return (unsigned char)(curHour > a->hour);
+        }
+        if (minutes > 2) return 1;
+        if (minutes < 2) return 0;
         return (unsigned char)(curSecond >= a->second);
     }
     if (isNextDate(a->day, a->month) && a->hour == 23 && curHour == 0) {
-        elapsed = (unsigned int)(60 - a->minute);
-        elapsed = (unsigned int)((elapsed << 6) - (elapsed << 2));
-        elapsed = (unsigned int)(elapsed - a->second + (((unsigned int)curMinute << 6) - ((unsigned int)curMinute << 2)) + curSecond);
-        return (unsigned char)(elapsed >= 120);
+        minutes = (unsigned char)(60 - a->minute + curMinute);
+        if (minutes > 2) return 1;
+        if (minutes < 2) return 0;
+        return (unsigned char)(curSecond >= a->second);
     }
     return 1;
-}
-
-static unsigned char productTime(unsigned char species)
-{
-    if (species == FARM_COW) return 47;
-    if (species == FARM_HORSE) return 23;
-    if (species == FARM_PIG) return 31;
-    return 13;
 }
 
 static void pushNotif(unsigned char kind, unsigned char species, unsigned char number)
@@ -182,14 +171,10 @@ static void createAnimal(unsigned char species)
     dirty = 1;
 }
 
-static unsigned char recordByte(unsigned char index, unsigned char field)
-{
-    unsigned char *p = (unsigned char *)&animals[index];
-    return p[field];
-}
-
 static void serviceEEPROM(void)
 {
+    unsigned char *p;
+
     if (EEPROM_IsBusy()) return;
 
     if (eeMode == EE_CLEAR) {
@@ -209,7 +194,8 @@ static void serviceEEPROM(void)
     }
 
     if (eeIndex < totalAnimals) {
-        if (EEPROM_StartByteWrite(eeAddr, recordByte(eeIndex, eeField))) {
+        p = (unsigned char *)&animals[eeIndex];
+        if (EEPROM_StartByteWrite(eeAddr, p[eeField])) {
             eeAddr++;
             eeField++;
             if (eeField >= 6) {
@@ -244,7 +230,7 @@ static void loadEEPROM(void)
 static void processSearch(void)
 {
     if (sleepIndex < totalAnimals) {
-        if (speciesOf(sleepIndex) == sleepSpecies) {
+        if (SPECIES_OF(sleepIndex) == sleepSpecies) {
             sleepSeen++;
             if (sleepSeen == sleepNumber) {
                 selectedIndex = sleepIndex;
@@ -287,7 +273,7 @@ static unsigned char newSecond(void)
 
 void Farm_Init(void)
 {
-    clearRuntime(1);
+    clearRuntime();
     eeMode = 0;
     eeIndex = 0;
     eeField = 0;
@@ -297,7 +283,7 @@ void Farm_Init(void)
 
 void Farm_Reset(void)
 {
-    clearRuntime(1);
+    clearRuntime();
     eeMode = EE_CLEAR;
 }
 
@@ -365,7 +351,7 @@ void motorFarm(void)
         if (index < FARM_SPECIES) {
             if (rebellion == 0) {
                 prodCount[index]++;
-                if (prodCount[index] >= productTime(index)) {
+                if (prodCount[index] >= PRODUCT_TIME(index)) {
                     prodCount[index] = 0;
                     awake = (unsigned char)(animalCount[index] - criticalCount[index]);
                     if (awake) {
@@ -382,8 +368,8 @@ void motorFarm(void)
         }
     } else {
         if (index < totalAnimals) {
-            if (isCriticalFlag(index) == 0 && elapsedCritical(&animals[index])) {
-                s = speciesOf(index);
+            if (IS_CRITICAL(index) == 0 && elapsedCritical(&animals[index])) {
+                s = SPECIES_OF(index);
                 animals[index].info |= FARM_CRITICAL;
                 criticalCount[s]++;
             }
@@ -394,25 +380,16 @@ void motorFarm(void)
     }
 }
 
-unsigned char Farm_IsConfigured(void) { return configured; }
-const char *Farm_GetName(void) { return farmName; }
-unsigned char Farm_GetAnimalCount(void) { return totalAnimals; }
-
 void Farm_GetAnimal(unsigned char index, unsigned char *species, unsigned char *number, unsigned char *critical)
 {
-    unsigned char i, n = 0, s = speciesOf(index);
+    unsigned char i, n = 0, s = SPECIES_OF(index);
 
     for (i = 0; i <= index; i++) {
-        if (speciesOf(i) == s) n++;
+        if (SPECIES_OF(i) == s) n++;
     }
     *species = s;
     *number = n;
-    *critical = isCriticalFlag(index);
-}
-
-unsigned char Farm_GetProductTotal(unsigned char species)
-{
-    return products[species];
+    *critical = IS_CRITICAL(index);
 }
 
 void Farm_Consume(unsigned char recipe)
@@ -429,11 +406,6 @@ void Farm_Consume(unsigned char recipe)
     } else if (recipe == 3) {
         if (products[FARM_HORSE] >= 2) products[FARM_HORSE] = (unsigned char)(products[FARM_HORSE] - 2);
     }
-}
-
-void Farm_SetRebellion(unsigned char active)
-{
-    rebellion = active;
 }
 
 unsigned char Farm_GetNotification(FarmNotification *notification)
@@ -458,16 +430,13 @@ void Farm_RequestSleep(unsigned char species, unsigned char number)
     sleepReq = 1;
 }
 
-unsigned char Farm_IsSleepSearchDone(void) { return sleepDone; }
-unsigned char Farm_IsSleepSearchFound(void) { return sleepFound; }
-
 void Farm_ApplySleep(void)
 {
     unsigned char s;
 
     if (selectedIndex >= totalAnimals) return;
-    s = speciesOf(selectedIndex);
-    if (isCriticalFlag(selectedIndex) && criticalCount[s]) criticalCount[s]--;
+    s = SPECIES_OF(selectedIndex);
+    if (IS_CRITICAL(selectedIndex) && criticalCount[s]) criticalCount[s]--;
     animals[selectedIndex].info &= (unsigned char)(~FARM_CRITICAL);
     animals[selectedIndex].day = curDay;
     animals[selectedIndex].month = curMonth;

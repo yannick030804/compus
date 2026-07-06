@@ -23,33 +23,6 @@
 #pragma config BOR = OFF
 #pragma config LVP = OFF
 
-static void PORT_Init(void)
-{
-    TRISCbits.TRISC6 = 0;
-    TRISCbits.TRISC7 = 1;
-
-    TRISBbits.TRISB0 = 1;
-    TRISBbits.TRISB1 = 0;
-    TRISBbits.TRISB2 = 1;
-    INTCON2bits.RBPU = 0;
-
-    TRISAbits.TRISA0 = 1;
-    TRISAbits.TRISA1 = 1;
-    TRISAbits.TRISA3 = 1;
-    TRISAbits.TRISA4 = 0;
-    LATAbits.LATA4 = 0;
-
-    LATD = 0x00;
-    TRISDbits.TRISD1 = 0;
-    TRISDbits.TRISD2 = 0;
-    TRISDbits.TRISD3 = 0;
-    TRISDbits.TRISD4 = 0;
-    TRISDbits.TRISD5 = 0;
-    TRISDbits.TRISD6 = 0;
-
-    ADCON1 = 0x0B;
-}
-
 void __interrupt() RSI_HIGH(void)
 {
     if (INTCONbits.TMR0IF == 1) {
@@ -64,7 +37,26 @@ void __interrupt() RSI_HIGH(void)
 
 void main(void)
 {
-    PORT_Init();
+    TRISCbits.TRISC6 = 0;
+    TRISCbits.TRISC7 = 1;
+    TRISBbits.TRISB0 = 1;
+    TRISBbits.TRISB1 = 0;
+    TRISBbits.TRISB2 = 1;
+    INTCON2bits.RBPU = 0;
+    TRISAbits.TRISA0 = 1;
+    TRISAbits.TRISA1 = 1;
+    TRISAbits.TRISA3 = 1;
+    TRISAbits.TRISA4 = 0;
+    LATAbits.LATA4 = 0;
+    LATD = 0x00;
+    TRISDbits.TRISD1 = 0;
+    TRISDbits.TRISD2 = 0;
+    TRISDbits.TRISD3 = 0;
+    TRISDbits.TRISD4 = 0;
+    TRISDbits.TRISD5 = 0;
+    TRISDbits.TRISD6 = 0;
+    ADCON1 = 0x0B;
+
     TI_Init();
     ADC_Init();
     Button_Init();

@@ -3,20 +3,22 @@
 #include "TAD_TIMER.h"
 
 #define ST_LINE_LEN 14
+#define DIGIT_AT(i) ((unsigned char)(rxLine[(i)] - '0'))
+#define TWO_AT(i) ((unsigned char)((DIGIT_AT(i) << 3) + (DIGIT_AT(i) << 1) + DIGIT_AT((unsigned char)((i) + 1))))
 
 static unsigned char timerHandle;
 static volatile unsigned char rxByte;
 static volatile unsigned char rxReady;
-static volatile unsigned char rxActive;
-static volatile unsigned char rxBit;
-static volatile unsigned char rxShift;
-static volatile unsigned char rxPos;
-static volatile unsigned char rxNext;
-static volatile unsigned char txActive;
-static volatile unsigned char txBit;
-static volatile unsigned char txShift;
-static volatile unsigned char txPos;
-static volatile unsigned char txNext;
+static unsigned char rxActive;
+static unsigned char rxBit;
+static unsigned char rxShift;
+static unsigned char rxPos;
+static unsigned char rxNext;
+static unsigned char txActive;
+static unsigned char txBit;
+static unsigned char txShift;
+static unsigned char txPos;
+static unsigned char txNext;
 static volatile unsigned char txEcho;
 static const char * volatile txPtr;
 static char rxLine[ST_LINE_LEN];
@@ -29,17 +31,6 @@ unsigned char serialTimeHour;
 unsigned char serialTimeMinute;
 unsigned char serialTimeSecond;
 
-static unsigned char digit(unsigned char i)
-{
-    if (rxLine[i] < '0' || rxLine[i] > '9') return 255;
-    return (unsigned char)(rxLine[i] - '0');
-}
-
-static unsigned char two(unsigned char i)
-{
-    return (unsigned char)((digit(i) << 3) + (digit(i) << 1) + digit((unsigned char)(i + 1)));
-}
-
 static unsigned char parseDate(void)
 {
     unsigned char d, m, h, mi, s;
@@ -48,14 +39,14 @@ static unsigned char parseDate(void)
     if (rxLen != ST_LINE_LEN) return 0;
     if (rxLine[2] != '/' || rxLine[5] != ' ' || rxLine[8] != ':' || rxLine[11] != ':') return 0;
     for (i = 0; i < ST_LINE_LEN; i++) {
-        if (i != 2 && i != 5 && i != 8 && i != 11 && digit(i) == 255) return 0;
+        if (i != 2 && i != 5 && i != 8 && i != 11 && (rxLine[i] < '0' || rxLine[i] > '9')) return 0;
     }
 
-    d = two(0);
-    m = two(3);
-    h = two(6);
-    mi = two(9);
-    s = two(12);
+    d = TWO_AT(0);
+    m = TWO_AT(3);
+    h = TWO_AT(6);
+    mi = TWO_AT(9);
+    s = TWO_AT(12);
     if (d < 1 || d > 31 || m < 1 || m > 12 || h > 23 || mi > 59 || s > 59) return 0;
 
     serialTimeDay = d;

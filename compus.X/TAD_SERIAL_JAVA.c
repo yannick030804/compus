@@ -1,7 +1,7 @@
 #include <xc.h>
 #include "TAD_SERIAL_JAVA.h"
 
-static char rxLine[40];
+static char rxLine[32];
 static unsigned char rxLen;
 static unsigned char txIndex;
 

@@ -14,10 +14,7 @@ static const char *txLine;
 static char txBuf[24];
 static char nameBuf[17];
 
-static unsigned char isDigit(char c)
-{
-    return (unsigned char)(c >= '0' && c <= '9');
-}
+#define IS_DIGIT(c) ((c) >= '0' && (c) <= '9')
 
 static unsigned char appendNum(unsigned char k, unsigned char value)
 {
@@ -52,17 +49,28 @@ static void endLine(unsigned char k)
     txLine = txBuf;
 }
 
+static void setReply(char c)
+{
+    txBuf[0] = c;
+    endLine(1);
+}
+
+static unsigned char appendText(unsigned char k, const char *text)
+{
+    while (*text != '\0') txBuf[k++] = *text++;
+    return k;
+}
+
 static unsigned char parseNum(const char *s, unsigned char *i, unsigned char *value, char end)
 {
     unsigned char n = 0;
-    unsigned char ok = 0;
+    unsigned char start = *i;
 
-    while (isDigit(s[*i])) {
+    while (IS_DIGIT(s[*i])) {
         n = (unsigned char)((n << 3) + (n << 1) + (unsigned char)(s[*i] - '0'));
         (*i)++;
-        ok = 1;
     }
-    if (ok == 0 || s[*i] != end) return 0;
+    if (*i == start || s[*i] != end) return 0;
     *value = n;
     return 1;
 }
@@ -98,23 +106,22 @@ static unsigned char parseSleep(const char *s)
     unsigned char species;
     unsigned char number;
 
-    if (s[i] == 'V' && s[i + 1] == 'A' && s[i + 2] == 'C' && s[i + 3] == 'A' && s[i + 4] == '$') {
+    if (s[i] == 'V') {
         species = FARM_COW;
-        i = (unsigned char)(i + 5);
-    } else if (s[i] == 'P' && s[i + 1] == 'O' && s[i + 2] == 'R' && s[i + 3] == 'C' && s[i + 4] == '$') {
+    } else if (s[i] == 'P') {
         species = FARM_PIG;
-        i = (unsigned char)(i + 5);
-    } else if (s[i] == 'C' && s[i + 1] == 'A' && s[i + 2] == 'V' && s[i + 3] == 'A' &&
-               s[i + 4] == 'L' && s[i + 5] == 'L' && s[i + 6] == '$') {
+    } else if (s[i] == 'C') {
         species = FARM_HORSE;
-        i = (unsigned char)(i + 7);
-    } else if (s[i] == 'G' && s[i + 1] == 'A' && s[i + 2] == 'L' && s[i + 3] == 'L' &&
-               s[i + 4] == 'I' && s[i + 5] == 'N' && s[i + 6] == 'A' && s[i + 7] == '$') {
+    } else if (s[i] == 'G') {
         species = FARM_CHICKEN;
-        i = (unsigned char)(i + 8);
     } else {
         return 0;
     }
+    while (s[i] != '$') {
+        if (s[i] == '\0') return 0;
+        i++;
+    }
+    i++;
     if (!parseNum(s, &i, &number, '\0') || number == 0) return 0;
     Farm_RequestSleep(species, number);
     return 1;
@@ -123,13 +130,13 @@ static unsigned char parseSleep(const char *s)
 static unsigned char appendSpecies(unsigned char k, unsigned char s)
 {
     if (s == FARM_COW) {
-        txBuf[k++] = 'V'; txBuf[k++] = 'A'; txBuf[k++] = 'C'; txBuf[k++] = 'A';
+        k = appendText(k, "VACA");
     } else if (s == FARM_PIG) {
-        txBuf[k++] = 'P'; txBuf[k++] = 'O'; txBuf[k++] = 'R'; txBuf[k++] = 'C';
+        k = appendText(k, "PORC");
     } else if (s == FARM_HORSE) {
-        txBuf[k++] = 'C'; txBuf[k++] = 'A'; txBuf[k++] = 'V'; txBuf[k++] = 'A'; txBuf[k++] = 'L'; txBuf[k++] = 'L';
+        k = appendText(k, "CAVALL");
     } else {
-        txBuf[k++] = 'G'; txBuf[k++] = 'A'; txBuf[k++] = 'L'; txBuf[k++] = 'L'; txBuf[k++] = 'I'; txBuf[k++] = 'N'; txBuf[k++] = 'A';
+        k = appendText(k, "GALLINA");
     }
     return k;
 }
@@ -162,9 +169,9 @@ static void buildAnimal(unsigned char animalIndex)
     k = appendNum(k, n);
     txBuf[k++] = '$';
     if (c) {
-        txBuf[k++] = 'S'; txBuf[k++] = 'L'; txBuf[k++] = 'E'; txBuf[k++] = 'E'; txBuf[k++] = 'P';
+        k = appendText(k, "SLEEP");
     } else {
-        txBuf[k++] = 'A'; txBuf[k++] = 'W'; txBuf[k++] = 'A'; txBuf[k++] = 'K'; txBuf[k++] = 'E';
+        k = appendText(k, "AWAKE");
     }
     endLine(k);
 }
@@ -193,10 +200,10 @@ static unsigned char processLine(const char *line, unsigned char *animalIndex)
         Heartbeat_SetRebellion(0);
     } else if (line[0] == 'C') {
         i = (line[1] == ':') ? 2 : 1;
-        if (isDigit(line[i]) && line[i + 1] == '\0') Farm_Consume((unsigned char)(line[i] - '0'));
+        if (IS_DIGIT(line[i]) && line[i + 1] == '\0') Farm_Consume((unsigned char)(line[i] - '0'));
     } else if (line[0] == 'S') {
         if (parseSleep(line)) return 4;
-        txLine = "N\r\n";
+        setReply('N');
         return 1;
     }
     return 0;
@@ -207,14 +214,14 @@ static unsigned char processInputs(void)
     unsigned char e;
 
     if (getButton()) {
-        txLine = "S\r\n";
+        setReply('S');
         return 1;
     }
     e = Joystick_GetEvent();
-    if (e == JOY_UP) txLine = "U\r\n";
-    else if (e == JOY_DOWN) txLine = "D\r\n";
-    else if (e == JOY_LEFT) txLine = "L\r\n";
-    else if (e == JOY_RIGHT) txLine = "R\r\n";
+    if (e == JOY_UP) setReply('U');
+    else if (e == JOY_DOWN) setReply('D');
+    else if (e == JOY_LEFT) setReply('L');
+    else if (e == JOY_RIGHT) setReply('R');
     else return 0;
     return 1;
 }
@@ -245,7 +252,7 @@ void motorController(void)
             buildAnimal(animalIndex);
             state++;
         } else {
-            txLine = "F\r\n";
+            setReply('F');
             state = 1;
         }
     } else if (state == 3) {
@@ -259,17 +266,17 @@ void motorController(void)
                 TI_ResetTics(timerHandle);
                 state++;
             } else {
-                txLine = "N\r\n";
+                setReply('N');
                 state = 1;
             }
         }
     } else {
         if (LDR_IsCovered()) {
             Farm_ApplySleep();
-            txLine = "Y\r\n";
+            setReply('Y');
             state = 1;
         } else if (TI_GetTics(timerHandle) >= 5000) {
-            txLine = "N\r\n";
+            setReply('N');
             state = 1;
         }
     }

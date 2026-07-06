@@ -8,42 +8,51 @@
 #define MESSAGE_TIME 3000
 
 static unsigned char timerHandle;
-static char line[17];
+static unsigned char column;
 
-static void clearLine(void)
+static void startLine(unsigned char row)
 {
-    unsigned char i;
-    for (i = 0; i < 16; i++) line[i] = ' ';
-    line[16] = '\0';
+    LCD_GotoXY(0, row);
+    column = 0;
+}
+
+static void putChar(char c)
+{
+    if (column < 16) {
+        LCD_PutChar(c);
+        column++;
+    }
+}
+
+static void putText(const char *text)
+{
+    while (column < 16 && *text != '\0') putChar(*text++);
+}
+
+static void fillLine(void)
+{
+    while (column < 16) putChar(' ');
 }
 
 static void writeLine(unsigned char row, const char *text)
 {
-    unsigned char i = 0;
-
-    LCD_GotoXY(0, row);
-    while (i < 16 && text[i] != '\0') {
-        LCD_PutChar(text[i]);
-        i++;
-    }
-    while (i < 16) {
-        LCD_PutChar(' ');
-        i++;
-    }
+    startLine(row);
+    putText(text);
+    fillLine();
 }
 
-static void put2(unsigned char pos, unsigned char value)
+static void put2(unsigned char value)
 {
     unsigned char tens = 0;
     while (value >= 10) {
         value = (unsigned char)(value - 10);
         tens++;
     }
-    line[pos] = (char)('0' + tens);
-    line[pos + 1] = (char)('0' + value);
+    putChar((char)('0' + tens));
+    putChar((char)('0' + value));
 }
 
-static unsigned char putNum(unsigned char pos, unsigned char value)
+static void putNum(unsigned char value)
 {
     unsigned char d = 0;
     unsigned char started = 0;
@@ -53,7 +62,7 @@ static unsigned char putNum(unsigned char pos, unsigned char value)
             value = (unsigned char)(value - 100);
             d++;
         }
-        line[pos++] = (char)('0' + d);
+        putChar((char)('0' + d));
         started = 1;
         d = 0;
     }
@@ -62,78 +71,54 @@ static unsigned char putNum(unsigned char pos, unsigned char value)
             value = (unsigned char)(value - 10);
             d++;
         }
-        line[pos++] = (char)('0' + d);
+        putChar((char)('0' + d));
     }
-    line[pos++] = (char)('0' + value);
-    return pos;
+    putChar((char)('0' + value));
 }
 
-static unsigned char putSpecies(unsigned char pos, unsigned char species)
+static void putName(unsigned char product, unsigned char species)
 {
     if (species == FARM_COW) {
-        line[pos++] = 'V'; line[pos++] = 'a'; line[pos++] = 'c'; line[pos++] = 'a';
+        putText(product ? "Llet" : "Vaca");
     } else if (species == FARM_PIG) {
-        line[pos++] = 'P'; line[pos++] = 'o'; line[pos++] = 'r'; line[pos++] = 'c';
+        putText(product ? "Pernil" : "Porc");
     } else if (species == FARM_HORSE) {
-        line[pos++] = 'C'; line[pos++] = 'a'; line[pos++] = 'v'; line[pos++] = 'a'; line[pos++] = 'l'; line[pos++] = 'l';
+        putText(product ? "Pinzells" : "Cavall");
     } else {
-        line[pos++] = 'G'; line[pos++] = 'a'; line[pos++] = 'l'; line[pos++] = 'l'; line[pos++] = 'i'; line[pos++] = 'n'; line[pos++] = 'a';
+        putText(product ? "Ous" : "Gallina");
     }
-    return pos;
-}
-
-static unsigned char putProduct(unsigned char pos, unsigned char species)
-{
-    if (species == FARM_COW) {
-        line[pos++] = 'L'; line[pos++] = 'l'; line[pos++] = 'e'; line[pos++] = 't';
-    } else if (species == FARM_PIG) {
-        line[pos++] = 'P'; line[pos++] = 'e'; line[pos++] = 'r'; line[pos++] = 'n'; line[pos++] = 'i'; line[pos++] = 'l';
-    } else if (species == FARM_HORSE) {
-        line[pos++] = 'P'; line[pos++] = 'i'; line[pos++] = 'n'; line[pos++] = 'z'; line[pos++] = 'e'; line[pos++] = 'l'; line[pos++] = 'l'; line[pos++] = 's';
-    } else {
-        line[pos++] = 'O'; line[pos++] = 'u'; line[pos++] = 's';
-    }
-    return pos;
 }
 
 static void showNotification(const FarmNotification *n)
 {
-    unsigned char pos;
-
     if (n->kind == FARM_NOTIF_ANIMAL) writeLine(0, "Nou Animal");
     else writeLine(0, "Nou Producte");
 
-    clearLine();
-    if (n->kind == FARM_NOTIF_ANIMAL) pos = putSpecies(0, n->species);
-    else pos = putProduct(0, n->species);
-    line[pos++] = ':';
-    line[pos++] = ' ';
-    pos = putNum(pos, n->number);
-    line[pos] = '\0';
-    writeLine(1, line);
+    startLine(1);
+    putName(n->kind, n->species);
+    putChar(':');
+    putChar(' ');
+    putNum(n->number);
+    fillLine();
 }
 
 static void showIdle(void)
 {
     if (Farm_IsConfigured() == 0) {
         writeLine(0, "Esperando Init");
-        writeLine(1, "");
+        startLine(1);
+        fillLine();
     } else if (SerialTime_IsConfigured() == 0) {
         writeLine(0, Farm_GetName());
         writeLine(1, "Falta Hora");
     } else {
         writeLine(0, Farm_GetName());
-        clearLine();
-        put2(0, SerialTime_GetDay());
-        line[2] = '/';
-        put2(3, SerialTime_GetMonth());
-        line[5] = '/';
-        line[6] = '2';
-        line[7] = '0';
-        line[8] = '2';
-        line[9] = '6';
-        line[10] = '\0';
-        writeLine(1, line);
+        startLine(1);
+        put2(SerialTime_GetDay());
+        putChar('/');
+        put2(SerialTime_GetMonth());
+        putText("/2026");
+        fillLine();
     }
 }
 
