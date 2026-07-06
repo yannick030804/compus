@@ -61,13 +61,13 @@ static unsigned char appendText(unsigned char k, const char *text)
 static unsigned char parseNum(const char *s, unsigned char *i, unsigned char *value, char end)
 {
     unsigned char n = 0;
+    unsigned char start = *i;
 
-    if (!IS_DIGIT(s[*i])) return 0;
     while (IS_DIGIT(s[*i])) {
         n = (unsigned char)((n << 3) + (n << 1) + (unsigned char)(s[*i] - '0'));
         (*i)++;
     }
-    if (s[*i] != end) return 0;
+    if (*i == start || s[*i] != end) return 0;
     *value = n;
     return 1;
 }
@@ -254,8 +254,13 @@ void motorController(void)
                 state = 1;
             }
         }
-    } else if (Farm_GetRestResult()) {
-        setReply((Farm_GetRestResult() == FARM_REST_SUCCESS) ? 'Y' : 'N');
-        state = 1;
+    } else {
+        if (Farm_GetRestResult() == FARM_REST_SUCCESS) {
+            setReply('Y');
+            state = 1;
+        } else if (Farm_GetRestResult() == FARM_REST_TIMEOUT) {
+            setReply('N');
+            state = 1;
+        }
     }
 }
