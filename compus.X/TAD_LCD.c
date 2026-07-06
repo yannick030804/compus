@@ -41,10 +41,15 @@ static void waitMs(unsigned char ms)
 
 void LCD_Init(void)
 {
+    unsigned char i;
+
     CONFIG_LCD;
     TI_NewTimer(&timerHandle);
     LCD_RS_DOWN();
     LCD_E_DOWN();
+    for (i = 0; i < 32; i++) frame[i] = ' ';
+    cursor = 0;
+    scan = 0;
 
     waitMs(100);
     firstCommand(3);
