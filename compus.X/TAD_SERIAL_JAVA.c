@@ -12,8 +12,6 @@ void SerialJava_Init(void)
     RCSTA = 0x90;
     SPBRG = 64;
     BAUDCON = 0x00;
-    rxLen = 0;
-    txIndex = 0;
 }
 
 const char *SJ_GetLine(void)

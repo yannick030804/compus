@@ -106,12 +106,8 @@ static void showIdle(void)
 {
     if (SerialTime_IsConfigured() == 0) {
         writeLine(0, "H");
-        startLine(1);
-        fillLine();
     } else if (Farm_IsConfigured() == 0) {
         writeLine(0, "I");
-        startLine(1);
-        fillLine();
     } else {
         writeLine(0, Farm_GetName());
         startLine(1);
@@ -119,7 +115,10 @@ static void showIdle(void)
         putChar('/');
         put2(SerialTime_GetMonth());
         fillLine();
+        return;
     }
+    startLine(1);
+    fillLine();
 }
 
 void Display_Init(void)

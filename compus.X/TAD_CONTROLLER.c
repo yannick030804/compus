@@ -223,16 +223,12 @@ void motorController(void)
     static unsigned char animalIndex = 0;
     const char *line;
 
-    Farm_SetCurrentDate(SerialTime_IsConfigured(), SerialTime_GetDay(), SerialTime_GetMonth(),
-                        SerialTime_GetHour(), SerialTime_GetMinute(), SerialTime_GetSecond());
-
     if (SerialTime_IsConfigured() == 0) {
         state = 0;
-        (void)SJ_GetLine();
-        (void)getButton();
-        (void)Joystick_GetEvent();
         return;
     }
+    Farm_SetCurrentDate(1, SerialTime_GetDay(), SerialTime_GetMonth(),
+                        SerialTime_GetHour(), SerialTime_GetMinute(), SerialTime_GetSecond());
 
     if (state == 0) {
         line = SJ_GetLine();
