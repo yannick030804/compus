@@ -1,7 +1,7 @@
 #include <xc.h>
 #include "TAD_SERIAL_JAVA.h"
 
-static char rxLine[32];
+static char rxLine[48];
 static unsigned char rxLen;
 static unsigned char txIndex;
 
@@ -12,6 +12,8 @@ void SerialJava_Init(void)
     RCSTA = 0x90;
     SPBRG = 64;
     BAUDCON = 0x00;
+    rxLen = 0;
+    txIndex = 0;
 }
 
 const char *SJ_GetLine(void)

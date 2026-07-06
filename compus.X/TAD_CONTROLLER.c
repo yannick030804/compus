@@ -76,7 +76,7 @@ static unsigned char parseInit(const char *s)
 {
     unsigned char i = (s[1] == ':') ? 2 : 1;
     unsigned char n = 0;
-    unsigned char cow, horse, pig, chicken;
+    unsigned char cow, pig, horse, chicken;
 
     while (s[i] != '$' && s[i] != '\0') {
         if (n < 16) nameBuf[n++] = s[i];
@@ -87,9 +87,9 @@ static unsigned char parseInit(const char *s)
     i++;
     if (!parseNum(s, &i, &cow, '$')) return 0;
     i++;
-    if (!parseNum(s, &i, &horse, '$')) return 0;
-    i++;
     if (!parseNum(s, &i, &pig, '$')) return 0;
+    i++;
+    if (!parseNum(s, &i, &horse, '$')) return 0;
     i++;
     if (!parseNum(s, &i, &chicken, '\0')) return 0;
     if (cow < 1 || cow > 60 || horse < 1 || horse > 60 || pig < 1 || pig > 60 || chicken < 1 || chicken > 60) return 0;
