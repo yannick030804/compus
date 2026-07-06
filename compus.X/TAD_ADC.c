@@ -10,6 +10,10 @@ void ADC_Init(void)
     busy = 0;
 }
 
+void motorADC(void)
+{
+}
+
 unsigned char ADC_Start(unsigned char channel)
 {
     if (busy) return 0;
