@@ -9,10 +9,24 @@
 #define LDR_TIMEOUT_MS 5000
 
 static unsigned char timerHandle;
+unsigned char ldrValue;
+
+static void sampleLDR(void)
+{
+    static unsigned char state = 0;
+
+    if (state == 0) {
+        if (ADC_Start(LDR_ADC_CHANNEL)) state = 1;
+    } else if (ADC_IsDone()) {
+        ldrValue = ADC_Read();
+        state = 0;
+    }
+}
 
 void LDR_Init(void)
 {
     TI_NewTimer(&timerHandle);
+    ldrValue = 0;
 }
 
 void motorLDR(void)
@@ -21,6 +35,7 @@ void motorLDR(void)
 
     if (Farm_IsRestRequestPending() == 0) {
         state = 0;
+        sampleLDR();
         return;
     }
     if (state == 0) {
@@ -38,7 +53,8 @@ void motorLDR(void)
     } else if (state == 3) {
         if (ADC_Start(LDR_ADC_CHANNEL)) state = 4;
     } else if (state == 4 && ADC_IsDone()) {
-        if (ADC_Read() < LDR_COVER_THRESHOLD) {
+        ldrValue = ADC_Read();
+        if (ldrValue < LDR_COVER_THRESHOLD) {
             Farm_NotifyRestSuccess();
             state = 0;
         } else {

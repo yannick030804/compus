@@ -1,13 +1,8 @@
 #include <xc.h>
 #include "TAD_DISPLAY.h"
-#include "TAD_FARM.h"
 #include "TAD_LCD.h"
-#include "TAD_SERIAL_TIME.h"
-#include "TAD_TIMER.h"
+#include "TAD_LDR.h"
 
-#define MESSAGE_TIME 3000
-
-static unsigned char timerHandle;
 static unsigned char column;
 
 static void startLine(unsigned char row)
@@ -52,61 +47,35 @@ static void put2(unsigned char value)
     putChar((char)('0' + value));
 }
 
-static void showNotification(const FarmNotification *n)
+static void put3(unsigned char value)
 {
-    startLine(0);
-    putChar(n->kind == FARM_NOTIF_ANIMAL ? 'A' : 'P');
-    putChar(' ');
-    putChar((char)('0' + n->species));
-    putChar(' ');
-    put2(n->number);
-    fillLine();
-    startLine(1);
-    fillLine();
+    unsigned char hundreds = 0;
+
+    if (value >= 100) {
+        hundreds++;
+        value = (unsigned char)(value - 100);
+        if (value >= 100) {
+            hundreds++;
+            value = (unsigned char)(value - 100);
+        }
+    }
+    putChar((char)('0' + hundreds));
+    put2(value);
 }
 
 static void showIdle(void)
 {
-    if (SerialTime_IsConfigured() == 0) {
-        writeLine(0, "H");
-    } else if (Farm_IsConfigured() == 0) {
-        writeLine(0, "I");
-    } else {
-        writeLine(0, Farm_GetName());
-        startLine(1);
-        put2(SerialTime_GetDay());
-        putChar('/');
-        put2(SerialTime_GetMonth());
-        putChar(' ');
-        put2(SerialTime_GetHour());
-        putChar(':');
-        put2(SerialTime_GetMinute());
-        fillLine();
-        return;
-    }
+    writeLine(0, "LDR");
     startLine(1);
+    put3(LDR_GetValue());
     fillLine();
 }
 
 void Display_Init(void)
 {
-    TI_NewTimer(&timerHandle);
 }
 
 void motorDisplay(void)
 {
-    static unsigned char state = 0;
-    FarmNotification n;
-
-    if (state == 0) {
-        if (Farm_GetNotification(&n)) {
-            showNotification(&n);
-            TI_ResetTics(timerHandle);
-            state++;
-        } else {
-            showIdle();
-        }
-    } else if (TI_GetTics(timerHandle) >= MESSAGE_TIME) {
-        state = 0;
-    }
+    showIdle();
 }
