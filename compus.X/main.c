@@ -61,7 +61,9 @@ void main(void)
         motorEEPROM();
         motorFarm();
         motorHeartbeat();
-        motorJoystick();
+        if (Farm_IsRestRequestPending() == 0) {
+            motorJoystick();
+        }
         motorLCD();
         motorLDR();
         motorSerialTime();
