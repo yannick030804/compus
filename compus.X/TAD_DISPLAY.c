@@ -52,29 +52,16 @@ static void put2(unsigned char value)
     putChar((char)('0' + value));
 }
 
-static void putName(unsigned char product, unsigned char species)
-{
-    if (species == FARM_COW) {
-        putText(product ? "Ll" : "Va");
-    } else if (species == FARM_PIG) {
-        putText(product ? "Pe" : "Po");
-    } else if (species == FARM_HORSE) {
-        putText(product ? "Pi" : "Ca");
-    } else {
-        putText(product ? "Ou" : "Ga");
-    }
-}
-
 static void showNotification(const FarmNotification *n)
 {
-    if (n->kind == FARM_NOTIF_ANIMAL) writeLine(0, "A");
-    else writeLine(0, "P");
-
-    startLine(1);
-    putName(n->kind, n->species);
-    putChar(':');
+    startLine(0);
+    putChar(n->kind == FARM_NOTIF_ANIMAL ? 'A' : 'P');
+    putChar(' ');
+    putChar((char)('0' + n->species));
     putChar(' ');
     put2(n->number);
+    fillLine();
+    startLine(1);
     fillLine();
 }
 

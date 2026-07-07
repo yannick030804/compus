@@ -40,8 +40,9 @@ void motorLDR(void)
         if (ADC_Start(LDR_ADC_CHANNEL)) state = 4;
     } else if (state == 4 && ADC_IsDone()) {
         unsigned char light = ADC_Read();
-        if ((light > baseLight && (unsigned char)(light - baseLight) > LDR_CHANGE_THRESHOLD) ||
-            (baseLight > light && (unsigned char)(baseLight - light) > LDR_CHANGE_THRESHOLD)) {
+        if (light > baseLight) light = (unsigned char)(light - baseLight);
+        else light = (unsigned char)(baseLight - light);
+        if (light > LDR_CHANGE_THRESHOLD) {
             Farm_NotifyRestSuccess();
             state = 0;
         } else {
