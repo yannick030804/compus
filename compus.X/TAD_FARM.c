@@ -386,6 +386,10 @@ void Farm_GetAnimal(unsigned char index, unsigned char *species, unsigned char *
 {
     unsigned char i, n = 0, s = SPECIES_OF(index);
 
+    if (IS_CRITICAL(index) == 0 && elapsedCritical(&animals[index])) {
+        animals[index].info |= FARM_CRITICAL;
+        criticalCount[s]++;
+    }
     for (i = 0; i <= index; i++) {
         if (SPECIES_OF(i) == s) n++;
     }
