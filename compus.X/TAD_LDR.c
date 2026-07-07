@@ -5,7 +5,7 @@
 #include "TAD_TIMER.h"
 
 #define LDR_ADC_CHANNEL 3
-#define LDR_COVER_THRESHOLD 150
+#define LDR_COVER_THRESHOLD 80
 #define LDR_TIMEOUT_MS 5000
 
 static unsigned char timerHandle;

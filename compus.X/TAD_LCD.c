@@ -15,20 +15,19 @@ static unsigned char timerHandle;
 static void sendByte(unsigned char value, unsigned char data)
 {
     if (data) LCD_RS_UP(); else LCD_RS_DOWN();
-    LCD_E_UP();
     LATD = (unsigned char)((LATD & 0xC3) | ((value >> 2) & 0x3C));
-    LCD_E_DOWN();
     LCD_E_UP();
+    LCD_E_DOWN();
     LATD = (unsigned char)((LATD & 0xC3) | ((value << 2) & 0x3C));
+    LCD_E_UP();
     LCD_E_DOWN();
 }
 
 static void firstCommand(unsigned char value)
 {
     LCD_RS_DOWN();
+    LATD = (unsigned char)((LATD & 0xC3) | ((value << 2) & 0x3C));
     LCD_E_UP();
-    LATDbits.LATD2 = value & 1;
-    LATDbits.LATD3 = (value >> 1) & 1;
     LCD_E_DOWN();
 }
 
@@ -47,11 +46,12 @@ void LCD_Init(void)
     TI_NewTimer(&timerHandle);
     LCD_RS_DOWN();
     LCD_E_DOWN();
+    LATD = (unsigned char)(LATD & 0xC3);
     for (i = 0; i < 32; i++) frame[i] = ' ';
     cursor = 0;
     scan = 0;
 
-    waitMs(100);
+    waitMs(200);
     firstCommand(3);
     waitMs(15);
     firstCommand(3);
