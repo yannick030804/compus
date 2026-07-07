@@ -57,10 +57,7 @@ static void showNotification(const FarmNotification *n)
     startLine(0);
     putChar(n->kind == FARM_NOTIF_ANIMAL ? 'A' : 'P');
     putChar(' ');
-    if (n->species == FARM_COW) putChar(n->kind == FARM_NOTIF_ANIMAL ? 'V' : 'L');
-    else if (n->species == FARM_HORSE) putChar(n->kind == FARM_NOTIF_ANIMAL ? 'C' : 'B');
-    else if (n->species == FARM_PIG) putChar(n->kind == FARM_NOTIF_ANIMAL ? 'P' : 'N');
-    else putChar(n->kind == FARM_NOTIF_ANIMAL ? 'G' : 'O');
+    putChar((char)('0' + n->species));
     putChar(' ');
     put2(n->number);
     fillLine();
