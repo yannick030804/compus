@@ -5,11 +5,10 @@
 #include "TAD_TIMER.h"
 
 #define LDR_ADC_CHANNEL 3
-#define LDR_CHANGE_THRESHOLD 20
+#define LDR_COVER_THRESHOLD 80
 #define LDR_TIMEOUT_MS 5000
 
 static unsigned char timerHandle;
-static unsigned char baseLight;
 
 void LDR_Init(void)
 {
@@ -34,15 +33,12 @@ void motorLDR(void)
     } else if (state == 1) {
         if (ADC_Start(LDR_ADC_CHANNEL)) state = 2;
     } else if (state == 2 && ADC_IsDone()) {
-        baseLight = ADC_Read();
+        ADC_Read();
         state = 3;
     } else if (state == 3) {
         if (ADC_Start(LDR_ADC_CHANNEL)) state = 4;
     } else if (state == 4 && ADC_IsDone()) {
-        unsigned char light = ADC_Read();
-        if (light > baseLight) light = (unsigned char)(light - baseLight);
-        else light = (unsigned char)(baseLight - light);
-        if (light > LDR_CHANGE_THRESHOLD) {
+        if (ADC_Read() < LDR_COVER_THRESHOLD) {
             Farm_NotifyRestSuccess();
             state = 0;
         } else {
