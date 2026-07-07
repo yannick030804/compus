@@ -33,7 +33,7 @@ void motorLDR(void)
     } else if (state == 1) {
         if (ADC_Start(LDR_ADC_CHANNEL)) state = 2;
     } else if (ADC_IsDone()) {
-        if (ADC_Read() > LDR_COVER_THRESHOLD) {
+        if (ADC_Read() < LDR_COVER_THRESHOLD) {
             Farm_NotifyRestSuccess();
             state = 0;
         } else {

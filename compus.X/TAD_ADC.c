@@ -12,7 +12,8 @@ void ADC_Init(void)
 
 unsigned char ADC_Start(unsigned char channel)
 {
-    if (busy) return 0;
+    if (busy && ADCON0bits.GO) return 0;
+    busy = 0;
     ADCON0 = (unsigned char)((ADCON0 & 0xC3) | (channel << 2));
     ADCON0bits.GO = 1;
     busy = 1;
